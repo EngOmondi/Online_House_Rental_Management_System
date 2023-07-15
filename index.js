@@ -57,8 +57,7 @@ app.use(session({
 
 app.use(passport.initialize());
 app.use(passport.session());
-
-mongoose.connect(`mongodb+srv://abhijoshi:abhijoshi@happyhomedb-35kqn.mongodb.net/HappyHomeDB`, {useNewUrlParser: true, useCreateIndex: true, useUnifiedTopology: true});
+mongoose.connect(`mongodb+srv://EngOmondi:Fidel1999@cluster0.gtlghjb.mongodb.net/?retryWrites=true&w=majority`, {useNewUrlParser: true, useCreateIndex: true, useUnifiedTopology: true});
 
 const leasepropertySchema = new mongoose.Schema({
     personname: String,
@@ -145,6 +144,7 @@ const messageSchema = new mongoose.Schema({
     chat: [chatSchema]
 });
 
+
 const metaSchema = new mongoose.Schema({
     totaluser: {type:Number,default:0},
     totalpropertysoldlist: {type:Number,default:0},
@@ -153,6 +153,7 @@ const metaSchema = new mongoose.Schema({
     totalpropertylease: {type:Number,default:0},
     totalfeedback: {type:Number,default:0}
 });
+
 
 
 userSchema.plugin(passportLocalMongoose);
@@ -209,10 +210,21 @@ app.post("/register", (req,res) => {
         }else{
             passport.authenticate("local")(req,res, function(){
 
-                Meta.find({},function(err,result){
-                    result[0].totaluser++;
-                    result[0].save(function(){});
+                Meta.findOne({}, function(err, result) {
+                    if (err) {
+                        console.log(err);
+                    } else {
+                        if (result) {
+                            result.totaluser++;
+                            result.save(function() {});
+                        } else {
+                            const newMeta = new Meta({});
+                            newMeta.totaluser++;
+                            newMeta.save(function() {});
+                        }
+                    }
                 });
+                
 
             res.render(__dirname + "/views/login.ejs", {err:"Enter Again"});
             });
